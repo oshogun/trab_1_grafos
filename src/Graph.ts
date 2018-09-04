@@ -72,60 +72,64 @@ class Graph<T> {
 
 	getAdjacentVertices(vertex:T):Array<T> {
 		const adjacentVertices = this.adjacencyList.get(vertex);
-		if (adjacentVertices != undefined) return adjacentVertices;
-		else throw new Error("Invalid vertex");
+		if (adjacentVertices != undefined) 
+			return adjacentVertices;
+		else 
+			throw new Error("Invalid vertex");
 	}
 	getDegree(vertex:T):number {
 		return this.getAdjacentVertices(vertex).length;
+	}
+
+	isRegular():boolean {
+		const degree = this.getDegree(this.oneVertex());
+		for(let vertex of this.getVertices()) {
+			if(this.getDegree(vertex) != degree) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	isComplete():boolean {
+		const n = this.order() - 1;
+		for (let vertex of this.getVertices()) {
+			if (this.getDegree(vertex) != n) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
 
 
 // Test for the lulz
 
-const myGraph = new Graph<number>();
-
-myGraph.addVertex(10);
-myGraph.addVertex(12);
-myGraph.addVertex(34);
-myGraph.connect(10, 12);
-myGraph.connect(12, 34);
-console.log("The adjacency list of node 10 is [" + myGraph.getAdjacentVertices(10) + "]");
-console.log("The adjacency list of node 12 is [" + myGraph.getAdjacentVertices(12)+ "]");
-console.log("The adjacency list of node 34 is [" + myGraph.getAdjacentVertices(34) + "]");
-console.log("Node 10 has " + myGraph.getDegree(10) + " adjacent node(s)");
-console.log("Node 12 has " + myGraph.getDegree(12) + " adjacent node(s)");
-console.log("Now disconnecting 12 and 34");
-myGraph.disconnect(12, 34);
-
-console.log("The adjacency list of node 12 is [" + myGraph.getAdjacentVertices(12)+ "]");
-console.log("The adjacency list of node 34 is [" + myGraph.getAdjacentVertices(34) + "]");
-
-console.log("A list of all the vertices in the graph: " + myGraph.getVertices());
-console.log("Deleting node 10");
-myGraph.removeVertex(10);
-console.log("The adjacency list of node 12 is [" + myGraph.getAdjacentVertices(12)+ "]");
-console.log("The adjacency list of node 34 is [" + myGraph.getAdjacentVertices(34) + "]");
-console.log("A list of all the vertices in the graph: " + myGraph.getVertices());
-console.log("Here's a random vertex: " + myGraph.oneVertex());
 
 
-const myCars = new Graph<string>();
+const myNewGraph = new Graph<number | string | boolean>();
 
-myCars.addVertex("Porsche Carrera GT");
-myCars.addVertex("Toyota Sprinter Trueno AE86 Eurobeato Edition");
-myCars.addVertex("Toyota GT86");
-myCars.addVertex("Porsche 911 Carrera RS");
-myCars.addVertex("Lamborghini Countach");
-myCars.addVertex("Lamborghini Gallardo");
+myNewGraph.addVertex(12);
+myNewGraph.addVertex("Birb");
+myNewGraph.addVertex(true);
 
-myCars.connect("Porsche Carrera GT", "Porsche 911 Carrera RS");
-myCars.connect("Toyota Sprinter Trueno AE86 Eurobeato Edition", "Toyota GT86");
-myCars.connect("Lamborghini Countach", "Lamborghini Gallardo");
-console.log("Here's my full garage: " + "[" + myCars.getVertices() + "]");
-console.log("Here are my Porsches: Porsche Carrera GT" + ", " +
-	 myCars.getAdjacentVertices("Porsche Carrera GT"));
-console.log("Here are my weeb cars: Toyota GT86" + ", " +
-	 myCars.getAdjacentVertices("Toyota GT86"));
-console.log("Here are my Lamborghinis: Lamborghini Countach" + ", " +
-	 myCars.getAdjacentVertices("Lamborghini Countach"));
+myNewGraph.connect(12, "Birb");
+myNewGraph.connect(12, true);
+myNewGraph.connect("Birb", true);
+
+console.log("The vertices of the graph are: [" + myNewGraph.getVertices() +"]");
+console.log("The vertices adjacent to 12 are: [" + myNewGraph.getAdjacentVertices(12) +"]");
+console.log("The vertices adjacent to true are: [" + myNewGraph.getAdjacentVertices(true) + "]");
+console.log("The vertices adjacent to Birb are: [" + myNewGraph.getAdjacentVertices("Birb") + "]");
+
+if (myNewGraph.isRegular()) {
+	console.log("This graph is a regular graph");
+} else {
+	console.log("This is not a regular graph");
+}
+
+if (myNewGraph.isComplete()) {
+	console.log("This graph is complete");
+} else {
+	console.log("This graph isn't complete");
+}
