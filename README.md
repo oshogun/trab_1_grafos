@@ -16,3 +16,7 @@ To install the dependencies (TypeScript and tsc-watch), run
 **To delete compiled JS files, run**
 
     $ make clean
+
+**To run the test file, run**
+    
+    $ make test
