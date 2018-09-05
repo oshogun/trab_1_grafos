@@ -1,5 +1,6 @@
-class Graph<T> {
-	private adjacencyList: Map<T, Array<T>>;
+
+export class Graph<T> {
+	protected adjacencyList: Map<T, Array<T>>;
 
 	constructor() {
 		this.adjacencyList = new Map<T, Array<T>>();
@@ -12,7 +13,7 @@ class Graph<T> {
 	removeVertex(vertex: T){
 		const vertexList = this.adjacencyList.get(vertex);
 		if (vertexList != undefined) {
-			for (let entry of vertexList) {
+			for (const entry of vertexList) {
 				this.disconnect(vertex, entry);
 			}
 		}
@@ -26,10 +27,10 @@ class Graph<T> {
 			v1List.push(v2);
 			v2List.push(v1);
 		} else {
-			if (v1List == undefined) {
+			if (v1List === undefined) {
 				throw new Error("Invalid vertex: " + v1);
 			}
-			if (v2List == undefined) {
+			if (v2List === undefined) {
 				throw new Error("Invalid vertex: " + v2);
 			}
 		}
@@ -48,10 +49,10 @@ class Graph<T> {
 				v2List.splice(v2index, 1);
 			}
 		} else {
-			if (v1List == undefined) {
+			if (v1List === undefined) {
 				throw new Error("Invalid vertex: " + v1);
 			}
-			if (v2List == undefined) {
+			if (v2List === undefined) {
 				throw new Error("Invalid vertex: " + v2);
 			}
 		}
@@ -83,7 +84,7 @@ class Graph<T> {
 
 	isRegular():boolean {
 		const degree = this.getDegree(this.oneVertex());
-		for(let vertex of this.getVertices()) {
+		for(const vertex of this.getVertices()) {
 			if(this.getDegree(vertex) != degree) {
 				return false;
 			}
@@ -93,43 +94,62 @@ class Graph<T> {
 
 	isComplete():boolean {
 		const n = this.order() - 1;
-		for (let vertex of this.getVertices()) {
+		for (const vertex of this.getVertices()) {
 			if (this.getDegree(vertex) != n) {
 				return false;
 			}
 		}
 		return true;
 	}
-}
+	transitiveClosure(vertex: T):Array<T> {
+		return this.findTransitiveClosure(vertex, []);
+	}
 
+	isConnected():boolean {
+		const vertices = this.getVertices();
+		const transClosure = this.transitiveClosure(this.oneVertex());
+		return this.compareSets(vertices, transClosure);
+	}
 
-// Test for the lulz
+	isTree():boolean {
+		const v = this.oneVertex();
+		return this.isConnected() && !this.hasCycleWith(v, v, []);
+	}
 
+	protected findTransitiveClosure(vertex:T, alreadyVisited:Array<T>):Array<T> {
+		if(vertex === undefined) {
+			throw new Error("Invalid vertex: " + vertex);
+		}
+		alreadyVisited.push(vertex);
+		for (const v of this.getAdjacentVertices(vertex)) {
+			if (!alreadyVisited.includes(v)) {
+				this.findTransitiveClosure(v, alreadyVisited);
+			}
+		}
+		return alreadyVisited;
+	}
 
+	protected compareSets(s1:Array<T>, s2:Array<T>):boolean {
+		const missing = s1.filter(item => s2.indexOf(item) < 0);
+		return missing.length === 0;
+	}
 
-const myNewGraph = new Graph<number | string | boolean>();
+	protected hasCycleWith(current:T, previous:T, alreadyVisited:Array<T>):boolean {
+		if (alreadyVisited.includes(current)) {
+			return true;
+		}
+		alreadyVisited.push(current);
+		for (const adj of this.getAdjacentVertices(current)) {
+			if (adj != previous) {
+				if (this.hasCycleWith(adj, current, alreadyVisited)) {
+					return true
+				}
+			}
+		}
+		const index = alreadyVisited.indexOf(current);
+		alreadyVisited.splice(index, 1);
 
-myNewGraph.addVertex(12);
-myNewGraph.addVertex("Birb");
-myNewGraph.addVertex(true);
+		return false;
+	}
 
-myNewGraph.connect(12, "Birb");
-myNewGraph.connect(12, true);
-myNewGraph.connect("Birb", true);
-
-console.log("The vertices of the graph are: [" + myNewGraph.getVertices() +"]");
-console.log("The vertices adjacent to 12 are: [" + myNewGraph.getAdjacentVertices(12) +"]");
-console.log("The vertices adjacent to true are: [" + myNewGraph.getAdjacentVertices(true) + "]");
-console.log("The vertices adjacent to Birb are: [" + myNewGraph.getAdjacentVertices("Birb") + "]");
-
-if (myNewGraph.isRegular()) {
-	console.log("This graph is a regular graph");
-} else {
-	console.log("This is not a regular graph");
-}
-
-if (myNewGraph.isComplete()) {
-	console.log("This graph is complete");
-} else {
-	console.log("This graph isn't complete");
 }
